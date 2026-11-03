@@ -210,6 +210,15 @@ async function boot() {
     applySnapshot(snapshot)
     lastSignature = signatureOf(collectSnapshot())
   }
+  writeFile(root, '/www/site/wp-content/mu-plugins/p8-auto-login.php', new TextEncoder().encode(`<?php
+add_filter( 'determine_current_user', function ( $user_id ) {
+	if ( $user_id ) {
+		return $user_id;
+	}
+	$user = get_user_by( 'login', 'admin' );
+	return $user ? (int) $user->ID : $user_id;
+}, 20 );
+`))
   ready = true
   self.postMessage({ type: 'ready' })
 }
