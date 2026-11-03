@@ -65,6 +65,20 @@ async function boot() {
   setStatus('Starting…')
   const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
   await navigator.serviceWorker.ready
+  const incoming = registration.installing || registration.waiting
+  if (incoming) {
+    await new Promise<void>((resolve) => {
+      if (incoming.state === 'activated' || incoming.state === 'redundant') {
+        resolve()
+        return
+      }
+      incoming.addEventListener('statechange', () => {
+        if (incoming.state === 'activated' || incoming.state === 'redundant') resolve()
+      })
+    })
+    location.reload()
+    return
+  }
   if (!navigator.serviceWorker.controller) {
     await new Promise<void>((resolve) => {
       const timer = window.setTimeout(() => resolve(), 3000)
