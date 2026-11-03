@@ -1,0 +1,18 @@
+{
+  "name": "p8-wordpress",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@bjorn3/browser_wasi_shim": "^0.4.2",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "vite": "^6.4.1",
+    "wrangler": "^4.45.0"
+  }
+}
