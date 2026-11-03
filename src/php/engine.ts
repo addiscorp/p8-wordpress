@@ -83,7 +83,7 @@ export async function compilePhp(url: string): Promise<WebAssembly.Module> {
 
 export type RunResult = { status: number; stdout: Uint8Array; stderr: string }
 
-export function runPhp(module: WebAssembly.Module, args: string[], root: Directory, stdin: Uint8Array = new Uint8Array()): RunResult {
+export async function runPhp(module: WebAssembly.Module, args: string[], root: Directory, stdin: Uint8Array = new Uint8Array()): Promise<RunResult> {
   const out: Uint8Array[] = []
   const err: Uint8Array[] = []
   const wasi = new WASI(args, ['HOME=/tmp', 'TMPDIR=/tmp', 'TMP=/tmp'], [
@@ -92,7 +92,8 @@ export function runPhp(module: WebAssembly.Module, args: string[], root: Directo
     new ConsoleStdout((bytes) => { err.push(copyBytes(bytes)) }),
     new PreopenDirectory('/', root.contents),
   ], { debug: false })
-  const instance = new WebAssembly.Instance(module, { wasi_snapshot_preview1: wasi.wasiImport })
+  // Chrome rejects `new WebAssembly.Instance` on the main thread above 8MB.
+  const instance = await WebAssembly.instantiate(module, { wasi_snapshot_preview1: wasi.wasiImport })
   let status = 0
   try {
     status = wasi.start(instance)
