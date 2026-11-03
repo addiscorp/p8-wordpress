@@ -57,17 +57,12 @@
         <h2>this tab</h2>
         <article class="card hot">
           <h3>Iframe</h3>
-          <p>the installed site · signed in as admin</p>
-        </article>
-        <div class="step"><i></i> fetch /site/*</div>
-        <article class="card hot">
-          <h3>Service worker</h3>
-          <p>catches only /site and /site/*</p>
+          <p>sandboxed · scripts cannot reach this page</p>
         </article>
         <div class="step"><i></i> postMessage</div>
         <article class="card">
           <h3>Shell</h3>
-          <p>this page · passes the request on</p>
+          <p>asks PHP for the page, then hands the HTML back</p>
         </article>
       </section>
       <section class="region">

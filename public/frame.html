@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>WordPress</title>
+<script>
+  const timer = setInterval(() => parent.postMessage({ type: 'frame-ready' }, '*'), 200)
+  window.addEventListener('message', (event) => {
+    if (event.source !== parent || event.data?.type !== 'render' || typeof event.data.html !== 'string') return
+    clearInterval(timer)
+    document.open()
+    document.write(event.data.html)
+    document.close()
+  })
+</script>
