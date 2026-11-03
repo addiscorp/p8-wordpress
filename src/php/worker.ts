@@ -23,7 +23,9 @@ const MIME: Record<string, string> = {
   webmanifest: 'application/manifest+json',
 }
 
-const PHP_ARGS = ['php2', '-d', 'max_execution_time=0', '-d', 'date.timezone=UTC', '-d', 'display_errors=0', '-S', '127.0.0.1:80', '--stdio', '127.0.0.1:1', '-t', '/www']
+// is_ssl() is true only when this listen port is 443. Match the page so CSS stays on the same scheme.
+const phpPort = self.location.protocol === 'https:' ? '443' : '80'
+const PHP_ARGS = ['php2', '-d', 'max_execution_time=0', '-d', 'date.timezone=UTC', '-d', 'display_errors=0', '-S', `127.0.0.1:${phpPort}`, '--stdio', '127.0.0.1:1', '-t', '/www']
 
 const root = makeRoot()
 let php: WebAssembly.Module | null = null
@@ -211,13 +213,25 @@ async function boot() {
     lastSignature = signatureOf(collectSnapshot())
   }
   writeFile(root, '/www/site/wp-content/mu-plugins/p8-auto-login.php', new TextEncoder().encode(`<?php
-add_filter( 'determine_current_user', function ( $user_id ) {
-	if ( $user_id ) {
-		return $user_id;
+add_action( 'init', function () {
+	if ( is_user_logged_in() ) {
+		return;
 	}
 	$user = get_user_by( 'login', 'admin' );
-	return $user ? (int) $user->ID : $user_id;
-}, 20 );
+	if ( ! $user ) {
+		return;
+	}
+	$user_id = (int) $user->ID;
+	$expiration = time() + apply_filters( 'auth_cookie_expiration', 2 * DAY_IN_SECONDS, $user_id, false );
+	$token = WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+	$secure = is_ssl();
+	$auth_cookie = wp_generate_auth_cookie( $user_id, $expiration, $secure ? 'secure_auth' : 'auth', $token );
+	$logged_in_cookie = wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token );
+	$_COOKIE[ $secure ? SECURE_AUTH_COOKIE : AUTH_COOKIE ] = $auth_cookie;
+	$_COOKIE[ LOGGED_IN_COOKIE ] = $logged_in_cookie;
+	wp_set_auth_cookie( $user_id, false, $secure, $token );
+	wp_set_current_user( $user_id );
+}, 1 );
 `))
   ready = true
   self.postMessage({ type: 'ready' })
