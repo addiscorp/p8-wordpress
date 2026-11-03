@@ -35,6 +35,8 @@ body {
 .bar strong { font-size: 15px; letter-spacing: -0.03em; }
 
 .meta { color: var(--muted); font-size: 12px; }
+a.meta { text-decoration: none; }
+a.meta:hover { color: var(--text); }
 
 .spacer { flex: 1; }
 

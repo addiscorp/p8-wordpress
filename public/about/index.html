@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About · p8 WordPress</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #12130f;
+        --bar: #1b1d18;
+        --text: #f3f1ea;
+        --muted: #9aa39c;
+        --hot: #8fd0c6;
+        --card: #1c2422;
+        --hot-bg: #17302e;
+        --line: #3a4440;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; }
+      a { color: inherit; }
+      .bar { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 14px; background: var(--bar); border-bottom: 1px solid #2e322b; }
+      .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+      .brand img { width: 22px; height: 22px; display: block; }
+      .brand strong { font-size: 15px; letter-spacing: -0.02em; }
+      .meta { color: var(--muted); font-size: 12px; }
+      .spacer { flex: 1; }
+      .lead { max-width: 1040px; margin: 0 auto; padding: 28px 22px 0; color: var(--muted); }
+      .diagram { max-width: 1040px; margin: 0 auto; padding: 18px 22px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .region { border: 1px dashed rgba(143, 208, 198, 0.4); border-radius: 18px; padding: 16px; }
+      .region h2 { margin: 0 0 14px; font-size: 13px; font-weight: 500; color: #b7c2bc; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+      .card.hot { background: var(--hot-bg); border-color: var(--hot); }
+      .card h3 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -0.02em; }
+      .card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+      .step { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; color: var(--hot); font-size: 12px; }
+      .step i { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--hot); }
+      .wide { grid-column: 1 / -1; }
+      .foot { max-width: 1040px; margin: 0 auto; padding: 18px 22px 36px; text-align: center; color: #c5cdc8; font-size: 13px; }
+      @media (max-width: 800px) {
+        .diagram { grid-template-columns: 1fr; }
+        .wide { grid-column: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="22" height="22" /><strong>p8</strong></a>
+      <span class="meta">WordPress</span>
+      <span class="spacer"></span>
+      <span class="meta">About</span>
+    </header>
+    <p class="lead">The site in the frame is WordPress, running in this tab. Cloudflare only delivered the files.</p>
+    <div class="diagram">
+      <section class="region">
+        <h2>this tab</h2>
+        <article class="card hot">
+          <h3>Iframe</h3>
+          <p>the installed site · signed in as admin</p>
+        </article>
+        <div class="step"><i></i> fetch /site/*</div>
+        <article class="card hot">
+          <h3>Service worker</h3>
+          <p>catches only /site and /site/*</p>
+        </article>
+        <div class="step"><i></i> postMessage</div>
+        <article class="card">
+          <h3>Shell</h3>
+          <p>this page · passes the request on</p>
+        </article>
+      </section>
+      <section class="region">
+        <h2>php worker</h2>
+        <article class="card">
+          <h3>Static files</h3>
+          <p>CSS, JS, images · served from memory</p>
+        </article>
+        <div class="step"><i></i> .php</div>
+        <article class="card hot">
+          <h3>php2.wasm</h3>
+          <p>PHP 8.4 · one request, then the instance is gone</p>
+        </article>
+        <div class="step"><i></i> wp-load</div>
+        <article class="card">
+          <h3>WordPress</h3>
+          <p>SQLite drop-in · at /www/site</p>
+        </article>
+        <div class="step"><i></i> PDO</div>
+        <article class="card">
+          <h3>Turso</h3>
+          <p>the database · compiled into the wasm</p>
+        </article>
+        <div class="step"><i></i> after a write</div>
+        <article class="card">
+          <h3>IndexedDB</h3>
+          <p>your changes · kept across reload</p>
+        </article>
+      </section>
+      <section class="region wide">
+        <h2>cloudflare</h2>
+        <article class="card">
+          <h3>Static files</h3>
+          <p>php2.wasm, the WordPress zip, and this page. Nothing here executes PHP.</p>
+        </article>
+      </section>
+    </div>
+    <p class="foot">The wasm is about 24MB. Chrome blocks instantiation on the main thread past 8MB, so the worker owns it. Reset deletes the IndexedDB overlay and restores the installed site.</p>
+  </body>
+</html>
