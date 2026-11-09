@@ -16,3 +16,7 @@ Workers Builds, from the repository root, production branch `main`:
 - Deploy command: `npx wrangler deploy`
 
 `npx wrangler deploy` publishes the worker named `p8-wordpress`.
+
+## License
+
+[MIT](LICENSE)
